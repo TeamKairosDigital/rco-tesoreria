@@ -10,6 +10,7 @@ import { toast } from "react-hot-toast";
 import { Switch } from '@headlessui/react';
 import Header from '@/components/Header';
 import React from "react";
+import Spinner from '@/components/Spinner';
 
 interface Movement {
   id: string;
@@ -46,6 +47,7 @@ export default function OperacionMensualPage() {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: '', direction: 'asc' });
   const [tooltip, setTooltip] = useState<{ open: boolean; text: string; x: number; y: number }>({ open: false, text: '', x: 0, y: 0 });
   const [detailModal, setDetailModal] = useState<{ open: boolean; movement: Movement | null }>({ open: false, movement: null });
+  const [loadingGeneral, setLoadingGeneral] = useState(false);
 
   useEffect(() => {
     const now = new Date();
@@ -68,6 +70,7 @@ export default function OperacionMensualPage() {
 
   const handleAddMovement = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoadingGeneral(true);
     try {
       await addDoc(collection(db, 'movements'), {
         ...newMovement,
@@ -82,6 +85,8 @@ export default function OperacionMensualPage() {
     } catch (error) {
       toast.error('Error al registrar el movimiento');
       console.error(error);
+    } finally {
+      setLoadingGeneral(false);
     }
   };
 
@@ -93,6 +98,7 @@ export default function OperacionMensualPage() {
   const handleUpdateMovement = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editMovement) return;
+    setLoadingGeneral(true);
     try {
       const docRef = doc(db, 'movements', editMovement.id);
       await updateDoc(docRef, {
@@ -108,6 +114,8 @@ export default function OperacionMensualPage() {
     } catch (error) {
       toast.error('Error al actualizar');
       console.error(error);
+    } finally {
+      setLoadingGeneral(false);
     }
   };
 
@@ -118,6 +126,7 @@ export default function OperacionMensualPage() {
 
   const handleConfirmDeleteRestore = async () => {
     if (!movementToDelete) return;
+    setLoadingGeneral(true);
     try {
       const docRef = doc(db, 'movements', movementToDelete.movement.id);
       await updateDoc(docRef, { eliminado: movementToDelete.action === 'delete' });
@@ -127,6 +136,8 @@ export default function OperacionMensualPage() {
     } catch (error) {
       toast.error('Error al actualizar');
       console.error(error);
+    } finally {
+      setLoadingGeneral(false);
     }
   };
 
@@ -200,274 +211,287 @@ export default function OperacionMensualPage() {
     });
   };
 
+  const handleChangePage = (page: number) => {
+    setLoadingGeneral(true);
+    setTimeout(() => {
+      setCurrentPage(page);
+      setLoadingGeneral(false);
+    }, 400); // Simula carga, reemplaza por lógica real si es necesario
+  };
+
   return (
     <ProtectedRoute>
-      <div className="bg-gray-900 w-full p-2 sm:p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-5 mb-4 sm:mb-8">
-          <div className="bg-gray-800 border border-gray-700 overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <dt className="text-sm font-medium text-gray-400">Total Ingresos</dt>
-              <dd className="mt-1 text-3xl font-bold text-green-400">${totalIngresos.toFixed(2)}</dd>
+      <div className="bg-gray-900 w-full p-2 sm:p-6 ">
+        {loadingGeneral && <Spinner />}
+        <main className="w-full mx-auto py-6 px-2 lg:px-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-5 mb-4 sm:mb-8">
+            <div className="bg-gray-800 border border-gray-700 overflow-hidden shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <dt className="text-sm font-medium text-gray-400">Total Ingresos</dt>
+                <dd className="mt-1 text-3xl font-bold text-green-400">${totalIngresos.toFixed(2)}</dd>
+              </div>
+            </div>
+            <div className="bg-gray-800 border border-gray-700 overflow-hidden shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <dt className="text-sm font-medium text-gray-400">Total Egresos</dt>
+                <dd className="mt-1 text-3xl font-bold text-red-400">${totalEgresos.toFixed(2)}</dd>
+              </div>
+            </div>
+            <div className="bg-gray-800 border border-gray-700 overflow-hidden shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <dt className="text-sm font-medium text-gray-400">Saldo Actual</dt>
+                <dd className={`mt-1 text-3xl font-bold ${saldo >= 0 ? 'text-green-400' : 'text-red-400'}`}>${saldo.toFixed(2)}</dd>
+              </div>
             </div>
           </div>
-          <div className="bg-gray-800 border border-gray-700 overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <dt className="text-sm font-medium text-gray-400">Total Egresos</dt>
-              <dd className="mt-1 text-3xl font-bold text-red-400">${totalEgresos.toFixed(2)}</dd>
-            </div>
-          </div>
-          <div className="bg-gray-800 border border-gray-700 overflow-hidden shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <dt className="text-sm font-medium text-gray-400">Saldo Actual</dt>
-              <dd className={`mt-1 text-3xl font-bold ${saldo >= 0 ? 'text-green-400' : 'text-red-400'}`}>${saldo.toFixed(2)}</dd>
-            </div>
-          </div>
-        </div>
-        <div className="bg-gray-800 border border-gray-700 shadow rounded-lg">
-          <div className="px-2 sm:px-4 py-2 sm:py-5">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 sm:mb-4 gap-2">
-              <h2 className="text-base sm:text-lg font-bold text-gray-200">Movimientos del Mes</h2>
-              <button
-                onClick={() => setShowModal(true)}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition cursor-pointer w-48 sm:w-auto"
-              >
-                Nuevo Movimiento
-              </button>
-            </div>
-            <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 mb-2 sm:mb-4 items-start sm:items-end ">
-              <div>
-                <label className="block text-sm text-gray-300 mb-1">Categoría</label>
-                <select
-                  value={filterCategoria}
-                  onChange={e => { setFilterCategoria(e.target.value); setCurrentPage(1); }}
-                  className="rounded-md border-gray-600 bg-gray-900 text-gray-100 px-3 py-2"
+          <div className="bg-gray-800 border border-gray-700 shadow rounded-lg">
+            <div className="px-2 sm:px-4 py-2 sm:py-5">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2 sm:mb-4 gap-2">
+                <h2 className="text-base sm:text-lg font-bold text-gray-200">Movimientos del Mes</h2>
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition cursor-pointer w-48 sm:w-auto"
                 >
-                  <option value="Todos">Todas</option>
-                  <option value="Diezmo">Diezmo</option>
-                  <option value="Ofrenda">Ofrenda</option>
-                  <option value="Otro">Otro</option>
-                </select>
+                  Nuevo Movimiento
+                </button>
               </div>
-              <div>
-                <label className="block text-sm text-gray-300 mb-1">Buscar</label>
-                <input
-                  type="text"
-                  placeholder="Buscar nota o descripción..."
-                  value={filterSearch}
-                  onChange={e => { setFilterSearch(e.target.value); setCurrentPage(1); }}
-                  className="rounded-md border-gray-600 bg-gray-900 text-gray-100 px-3 py-2"
-                />
-              </div>
-              {role === 'admin' && (
-                <div className="flex items-center gap-2 mt-6">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={showDeleted}
-                      onChange={v => { setShowDeleted(v); setCurrentPage(1); }}
-                      className={`${showDeleted ? 'bg-indigo-600' : 'bg-gray-600'} relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer`}
+              <div className="flex sm:flex-row flex-wrap gap-2 sm:gap-4 mb-2 sm:mb-4 items-start sm:items-end justify-between">
+                <div className="flex sm:flex-row gap-2 sm:gap-4 mb-2 sm:mb-4 items-start sm:items-end justify-between">
+                  <div className="self-center mt-2 sm:mt-0">
+                    <label className="block text-sm text-gray-300 mb-1">Categoría</label>
+                    <select
+                      value={filterCategoria}
+                      onChange={e => { setFilterCategoria(e.target.value); setCurrentPage(1); }}
+                      className="rounded-md border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 cursor-pointer"
                     >
-                      <span className="sr-only">Ver eliminados</span>
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showDeleted ? 'translate-x-6' : 'translate-x-1'}`}
-                      />
-                    </Switch>
-                    <span className="text-sm text-gray-300 select-none">Ver eliminados</span>
+                      <option value="Todos">Todas</option>
+                      <option value="Diezmo">Diezmo</option>
+                      <option value="Ofrenda">Ofrenda</option>
+                      <option value="Otro">Otro</option>
+                    </select>
+                  </div>
+                  <div className="self-center mt-2 sm:mt-0">
+                    <label className="block text-sm text-gray-300 mb-1">Buscar</label>
+                    <input
+                      type="text"
+                      placeholder="Buscar nota o descripción..."
+                      value={filterSearch}
+                      onChange={e => { setFilterSearch(e.target.value); setCurrentPage(1); }}
+                      className="rounded-md border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 w-full sm:w-auto"
+                    />
                   </div>
                 </div>
-              )}
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-700 text-xs sm:text-sm">
-                <thead className="bg-gray-700">
-                  <tr>
-                    <th className={`px-6 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer ${sortConfig.key === 'type' ? 'text-indigo-400' : 'text-gray-200'}`}
-                        onClick={() => handleSort('type')}>
-                      Tipo <ArrowsUpDownIcon className="inline h-4 w-4 mb-1" />
-                      {sortConfig.key === 'type' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="inline h-4 w-4" /> : <ChevronDownIcon className="inline h-4 w-4" />)}
-                    </th>
-                    <th className={`px-6 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer ${sortConfig.key === 'amount' ? 'text-indigo-400' : 'text-gray-200'}`}
-                        onClick={() => handleSort('amount')}>
-                      Monto <ArrowsUpDownIcon className="inline h-4 w-4 mb-1" />
-                      {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="inline h-4 w-4" /> : <ChevronDownIcon className="inline h-4 w-4" />)}
-                    </th>
-                    <th className={`px-6 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer ${sortConfig.key === 'categoria' ? 'text-indigo-400' : 'text-gray-200'}`}
-                        onClick={() => handleSort('categoria')}>
-                      Categoría <ArrowsUpDownIcon className="inline h-4 w-4 mb-1" />
-                      {sortConfig.key === 'categoria' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="inline h-4 w-4" /> : <ChevronDownIcon className="inline h-4 w-4" />)}
-                    </th>
-                    <th className={`px-6 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer ${sortConfig.key === 'nota' ? 'text-indigo-400' : 'text-gray-200'}`}
-                        onClick={() => handleSort('nota')}>
-                      Nota <ArrowsUpDownIcon className="inline h-4 w-4 mb-1" />
-                      {sortConfig.key === 'nota' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="inline h-4 w-4" /> : <ChevronDownIcon className="inline h-4 w-4" />)}
-                    </th>
-                    <th className={`px-6 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer ${sortConfig.key === 'description' ? 'text-indigo-400' : 'text-gray-200'}`}
-                        onClick={() => handleSort('description')}>
-                      Descripción <ArrowsUpDownIcon className="inline h-4 w-4 mb-1" />
-                      {sortConfig.key === 'description' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="inline h-4 w-4" /> : <ChevronDownIcon className="inline h-4 w-4" />)}
-                    </th>
-                    <th className={`px-6 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer ${sortConfig.key === 'date' ? 'text-indigo-400' : 'text-gray-200'}`}
-                        onClick={() => handleSort('date')}>
-                      Fecha <ArrowsUpDownIcon className="inline h-4 w-4 mb-1" />
-                      {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="inline h-4 w-4" /> : <ChevronDownIcon className="inline h-4 w-4" />)}
-                    </th>
-                    <th className={`px-6 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer ${sortConfig.key === 'user' ? 'text-indigo-400' : 'text-gray-200'}`}
-                        onClick={() => handleSort('user')}>
-                      Usuario <ArrowsUpDownIcon className="inline h-4 w-4 mb-1" />
-                      {sortConfig.key === 'user' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="inline h-4 w-4" /> : <ChevronDownIcon className="inline h-4 w-4" />)}
-                    </th>
-                    {role === 'admin' && (
-                      <th className="px-6 py-3 text-left text-xs font-bold text-gray-200 uppercase tracking-wider">Acciones</th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody className="bg-gray-800 divide-y divide-gray-700">
-                  {paginatedMovements.map((movement) => (
-                    <tr key={movement.id} className={movement.eliminado ? 'opacity-50' : ''}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {movement.type === 'ingreso' ? (
-                          <ArrowUpIcon className="h-5 w-5 text-green-400" />
-                        ) : (
-                          <ArrowDownIcon className="h-5 w-5 text-red-400" />
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={movement.type === 'ingreso' ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
-                          ${movement.amount.toFixed(2)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-200">{movement.categoria || '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-200">
-                        {movement.categoria === 'Otro' ? (
-                          (movement.nota && movement.nota.length > 25) ? (
+                {role === 'admin' && (
+                  <div className="flex items-center gap-2 self-center my-2 sm:mt-0">
+                    <div className="flex items-center gap-2">
+                      <Switch
+                        checked={showDeleted}
+                        onChange={v => { setShowDeleted(v); setCurrentPage(1); }}
+                        className={`${showDeleted ? 'bg-indigo-600' : 'bg-gray-600'} relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none cursor-pointer`}
+                      >
+                        <span className="sr-only">Ver eliminados</span>
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showDeleted ? 'translate-x-6' : 'translate-x-1'}`}
+                        />
+                      </Switch>
+                      <span className="text-sm text-gray-300 select-none">Ver eliminados</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-700 text-xs sm:text-sm">
+                  <thead className="bg-gray-700">
+                    <tr>
+                      <th className={`px-6 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer ${sortConfig.key === 'type' ? 'text-indigo-400' : 'text-gray-200'}`}
+                          onClick={() => handleSort('type')}>
+                        Tipo <ArrowsUpDownIcon className="inline h-4 w-4 mb-1" />
+                        {sortConfig.key === 'type' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="inline h-4 w-4" /> : <ChevronDownIcon className="inline h-4 w-4" />)}
+                      </th>
+                      <th className={`px-6 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer ${sortConfig.key === 'amount' ? 'text-indigo-400' : 'text-gray-200'}`}
+                          onClick={() => handleSort('amount')}>
+                        Monto <ArrowsUpDownIcon className="inline h-4 w-4 mb-1" />
+                        {sortConfig.key === 'amount' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="inline h-4 w-4" /> : <ChevronDownIcon className="inline h-4 w-4" />)}
+                      </th>
+                      <th className={`px-6 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer ${sortConfig.key === 'categoria' ? 'text-indigo-400' : 'text-gray-200'}`}
+                          onClick={() => handleSort('categoria')}>
+                        Categoría <ArrowsUpDownIcon className="inline h-4 w-4 mb-1" />
+                        {sortConfig.key === 'categoria' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="inline h-4 w-4" /> : <ChevronDownIcon className="inline h-4 w-4" />)}
+                      </th>
+                      <th className={`px-6 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer ${sortConfig.key === 'nota' ? 'text-indigo-400' : 'text-gray-200'}`}
+                          onClick={() => handleSort('nota')}>
+                        Nota <ArrowsUpDownIcon className="inline h-4 w-4 mb-1" />
+                        {sortConfig.key === 'nota' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="inline h-4 w-4" /> : <ChevronDownIcon className="inline h-4 w-4" />)}
+                      </th>
+                      <th className={`px-6 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer ${sortConfig.key === 'description' ? 'text-indigo-400' : 'text-gray-200'}`}
+                          onClick={() => handleSort('description')}>
+                        Descripción <ArrowsUpDownIcon className="inline h-4 w-4 mb-1" />
+                        {sortConfig.key === 'description' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="inline h-4 w-4" /> : <ChevronDownIcon className="inline h-4 w-4" />)}
+                      </th>
+                      <th className={`px-6 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer ${sortConfig.key === 'date' ? 'text-indigo-400' : 'text-gray-200'}`}
+                          onClick={() => handleSort('date')}>
+                        Fecha <ArrowsUpDownIcon className="inline h-4 w-4 mb-1" />
+                        {sortConfig.key === 'date' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="inline h-4 w-4" /> : <ChevronDownIcon className="inline h-4 w-4" />)}
+                      </th>
+                      <th className={`px-6 py-3 text-left text-xs font-bold uppercase tracking-wider cursor-pointer ${sortConfig.key === 'user' ? 'text-indigo-400' : 'text-gray-200'}`}
+                          onClick={() => handleSort('user')}>
+                        Usuario <ArrowsUpDownIcon className="inline h-4 w-4 mb-1" />
+                        {sortConfig.key === 'user' && (sortConfig.direction === 'asc' ? <ChevronUpIcon className="inline h-4 w-4" /> : <ChevronDownIcon className="inline h-4 w-4" />)}
+                      </th>
+                      {role === 'admin' && (
+                        <th className="px-6 py-3 text-left text-xs font-bold text-gray-200 uppercase tracking-wider">Acciones</th>
+                      )}
+                    </tr>
+                  </thead>
+                  <tbody className="bg-gray-800 divide-y divide-gray-700">
+                    {paginatedMovements.map((movement) => (
+                      <tr key={movement.id} className={movement.eliminado ? 'opacity-50' : ''}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {movement.type === 'ingreso' ? (
+                            <ArrowUpIcon className="h-5 w-5 text-green-400" />
+                          ) : (
+                            <ArrowDownIcon className="h-5 w-5 text-red-400" />
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={movement.type === 'ingreso' ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
+                            ${movement.amount.toFixed(2)}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-200">{movement.categoria || '-'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-200">
+                          {movement.categoria === 'Otro' ? (
+                            (movement.nota && movement.nota.length > 25) ? (
+                              <>
+                                {movement.nota.slice(0, 25)}...
+                                {/* <EyeIcon
+                                  className="inline h-4 w-4 ml-1 text-indigo-400 cursor-pointer"
+                                  onClick={() => handleShowDetails(movement)}
+                                /> */}
+                              </>
+                            ) : (movement.nota || '-')
+                          ) : '-'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-200">
+                          {movement.description.length > 25 ? (
                             <>
-                              {movement.nota.slice(0, 25)}...
+                              {movement.description.slice(0, 25)}...
                               {/* <EyeIcon
                                 className="inline h-4 w-4 ml-1 text-indigo-400 cursor-pointer"
                                 onClick={() => handleShowDetails(movement)}
                               /> */}
                             </>
-                          ) : (movement.nota || '-')
-                        ) : '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-200">
-                        {movement.description.length > 25 ? (
-                          <>
-                            {movement.description.slice(0, 25)}...
-                            {/* <EyeIcon
-                              className="inline h-4 w-4 ml-1 text-indigo-400 cursor-pointer"
-                              onClick={() => handleShowDetails(movement)}
-                            /> */}
-                          </>
-                        ) : movement.description}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-200">{movement.date.toLocaleDateString()}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-gray-400">{movement.user}</td>
-                        <td className="px-6 py-4 whitespace-nowrap flex gap-2">
-                          <button
-                            onClick={() => handleShowDetails(movement)}
-                            className="text-indigo-400 hover:text-indigo-300 mr-3 cursor-pointer"
-                            >
-                              <EyeIcon className="h-5 w-5" />
-                          </button>
-                          {role === 'admin' && (
-                            <div>
-                              {!movement.eliminado && (
-                                <>
-                                  <button
-                                    className="text-indigo-400 hover:text-indigo-600 font-bold mr-3 cursor-pointer"
-                                    title="Editar"
-                                    onClick={() => handleEditMovement(movement)}
-                                  >
-                                    <PencilSquareIcon className="h-5 w-5" />
-                                  </button>
-                                  <button
-                                    className="text-red-400 hover:text-red-600 font-bold mr-3 cursor-pointer"
-                                    title="Eliminar"
-                                    onClick={() => handleDeleteRestoreClick(movement, 'delete')}
-                                  >
-                                    <TrashIcon className="h-5 w-5" />
-                                  </button>
-                                </>
-                              )}
-                              {movement.eliminado && (
-                                <button
-                                  className="text-green-400 hover:text-green-600 font-bold cursor-pointer"
-                                  title="Restaurar"
-                                  onClick={() => handleDeleteRestoreClick(movement, 'restore')}
-                                >Restaurar</button>
-                              )}
-                            </div>
-                          )}
+                          ) : movement.description}
                         </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-200">{movement.date.toLocaleDateString()}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-gray-400">{movement.user}</td>
+                          <td className="px-6 py-4 whitespace-nowrap flex gap-2">
+                            <button
+                              onClick={() => handleShowDetails(movement)}
+                              className="text-indigo-400 hover:text-indigo-300 mr-3 cursor-pointer"
+                              >
+                                <EyeIcon className="h-5 w-5" />
+                            </button>
+                            {role === 'admin' && (
+                              <div>
+                                {!movement.eliminado && (
+                                  <>
+                                    <button
+                                      className="text-indigo-400 hover:text-indigo-600 font-bold mr-3 cursor-pointer"
+                                      title="Editar"
+                                      onClick={() => handleEditMovement(movement)}
+                                    >
+                                      <PencilSquareIcon className="h-5 w-5" />
+                                    </button>
+                                    <button
+                                      className="text-red-400 hover:text-red-600 font-bold mr-3 cursor-pointer"
+                                      title="Eliminar"
+                                      onClick={() => handleDeleteRestoreClick(movement, 'delete')}
+                                    >
+                                      <TrashIcon className="h-5 w-5" />
+                                    </button>
+                                  </>
+                                )}
+                                {movement.eliminado && (
+                                  <button
+                                    className="text-green-400 hover:text-green-600 font-bold cursor-pointer"
+                                    title="Restaurar"
+                                    onClick={() => handleDeleteRestoreClick(movement, 'restore')}
+                                  >Restaurar</button>
+                                )}
+                              </div>
+                            )}
+                          </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+                  {/* Paginación y selector de filas por página debajo de la tabla, bien alineados */}
+                  <div className="flex flex-col sm:flex-row justify-between items-center mt-2 sm:mt-4 gap-2">
+                    {/* Texto de rango */}
+                    <span className="text-gray-300 text-sm mx-2">
+                      Mostrando del {(currentPage - 1) * rowsPerPage + 1} al {Math.min(currentPage * rowsPerPage, filteredMovements.length)} de {filteredMovements.length} entradas
+                    </span>
+                    {/* Paginador */}
+                    <div className="flex items-center gap-2 my-3 sm:my-0">
+                      <button
+                        onClick={() => handleChangePage(1)}
+                        disabled={currentPage === 1}
+                        className={`px-2 py-1 rounded ${currentPage === 1 ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
+                        title="Primera"
+                      >«</button>
+                      <button
+                        onClick={() => handleChangePage(Math.max(1, currentPage - 1))}
+                        disabled={currentPage === 1}
+                        className={`px-2 py-1 rounded ${currentPage === 1 ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
+                        title="Anterior"
+                      >‹</button>
+                      {/* Números de página */}
+                      {Array.from({ length: totalPages }, (_, i) => i + 1)
+                        .filter(page =>
+                          page === 1 ||
+                          page === totalPages ||
+                          (page >= currentPage - 2 && page <= currentPage + 2)
+                        )
+                        .map((page, idx, arr) => (
+                          <React.Fragment key={page}>
+                            {idx > 0 && page - arr[idx - 1] > 1 && <span className="px-1 text-gray-400">...</span>}
+                            <button
+                              onClick={() => handleChangePage(page)}
+                              className={`px-3 py-1 rounded-full ${currentPage === page ? 'bg-white text-gray-900 font-bold' : 'bg-gray-800 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
+                            >
+                              {page}
+                            </button>
+                          </React.Fragment>
+                        ))}
+                      <button
+                        onClick={() => handleChangePage(Math.min(totalPages, currentPage + 1))}
+                        disabled={currentPage === totalPages}
+                        className={`px-2 py-1 rounded ${currentPage === totalPages ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
+                        title="Siguiente"
+                      >›</button>
+                      <button
+                        onClick={() => handleChangePage(totalPages)}
+                        disabled={currentPage === totalPages}
+                        className={`px-2 py-1 rounded ${currentPage === totalPages ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
+                        title="Última"
+                      >»</button>
+                    </div>
+                    {/* Selector de filas por página */}
+                    <div>
+                      <select
+                        value={rowsPerPage}
+                        onChange={e => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                        className="rounded-md border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 cursor-pointer"
+                      >
+                        {[5, 10, 20, 50].map(n => <option key={n} value={n}>{n}</option>)}
+                      </select>
+                    </div>
+                  </div>
             </div>
-                {/* Paginación y selector de filas por página debajo de la tabla, bien alineados */}
-                <div className="flex flex-col sm:flex-row justify-between items-center mt-2 sm:mt-4 gap-2">
-                  {/* Texto de rango */}
-                  <span className="text-gray-300 text-sm mx-2">
-                    Mostrando del {(currentPage - 1) * rowsPerPage + 1} al {Math.min(currentPage * rowsPerPage, filteredMovements.length)} de {filteredMovements.length} entradas
-                  </span>
-                  {/* Paginador */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setCurrentPage(1)}
-                      disabled={currentPage === 1}
-                      className={`px-2 py-1 rounded ${currentPage === 1 ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
-                      title="Primera"
-                    >«</button>
-                    <button
-                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      className={`px-2 py-1 rounded ${currentPage === 1 ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
-                      title="Anterior"
-                    >‹</button>
-                    {/* Números de página */}
-                    {Array.from({ length: totalPages }, (_, i) => i + 1)
-                      .filter(page =>
-                        page === 1 ||
-                        page === totalPages ||
-                        (page >= currentPage - 2 && page <= currentPage + 2)
-                      )
-                      .map((page, idx, arr) => (
-                        <React.Fragment key={page}>
-                          {idx > 0 && page - arr[idx - 1] > 1 && <span className="px-1 text-gray-400">...</span>}
-                          <button
-                            onClick={() => setCurrentPage(page)}
-                            className={`px-3 py-1 rounded-full ${currentPage === page ? 'bg-white text-gray-900 font-bold' : 'bg-gray-800 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
-                          >
-                            {page}
-                          </button>
-                        </React.Fragment>
-                      ))}
-                    <button
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                      className={`px-2 py-1 rounded ${currentPage === totalPages ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
-                      title="Siguiente"
-                    >›</button>
-                    <button
-                      onClick={() => setCurrentPage(totalPages)}
-                      disabled={currentPage === totalPages}
-                      className={`px-2 py-1 rounded ${currentPage === totalPages ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
-                      title="Última"
-                    >»</button>
-                  </div>
-                  {/* Selector de filas por página */}
-                  <div>
-                    <select
-                      value={rowsPerPage}
-                      onChange={e => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                      className="rounded-md border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 cursor-pointer"
-                    >
-                      {[5, 10, 20, 50].map(n => <option key={n} value={n}>{n}</option>)}
-                    </select>
-                  </div>
-                </div>
           </div>
-        </div>
+        </main>
 
         {showModal && (
           <div className="fixed inset-0 bg-black/75 bg-opacity-70 flex items-center justify-center z-50">
@@ -533,13 +557,13 @@ export default function OperacionMensualPage() {
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="bg-gray-600 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded-md text-sm font-semibold transition"
+                    className="bg-gray-600 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded-md text-sm font-semibold transition cursor-pointer"
                   >
                     Cancelar
                   </button>
                   <button
                     type="submit"
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition"
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition cursor-pointer"
                   >
                     Guardar
                   </button>

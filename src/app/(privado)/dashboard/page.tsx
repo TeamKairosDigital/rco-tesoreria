@@ -13,6 +13,7 @@ import { ChevronUpIcon, ChevronDownIcon, EyeIcon } from '@heroicons/react/24/out
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { format } from "date-fns";
 import Header from '@/components/Header';
+import Spinner from '@/components/Spinner';
 
 interface Movement {
   id: string;
@@ -71,6 +72,8 @@ export default function Dashboard() {
 
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
 
+  const [loadingGeneral, setLoadingGeneral] = useState(false);
+
   useEffect(() => {
     const q = query(collection(db, 'movements'), orderBy('date', 'asc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -112,6 +115,7 @@ export default function Dashboard() {
 
   const handleAddMovement = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoadingGeneral(true);
     try {
       await addDoc(collection(db, 'movements'), {
         ...newMovement,
@@ -126,6 +130,8 @@ export default function Dashboard() {
     } catch (error) {
       toast.error('Error al registrar el movimiento');
       console.error(error);
+    } finally {
+      setLoadingGeneral(false);
     }
   };
 
@@ -136,23 +142,29 @@ export default function Dashboard() {
 
   // Eliminar (borrado lógico)
   const handleDelete = async (id: string) => {
+    setLoadingGeneral(true);
     try {
       await updateDoc(doc(db, 'movements', id), { eliminado: true });
       toast.success('Movimiento eliminado (borrado lógico)');
     } catch (error) {
       toast.error('Error al eliminar');
       console.error(error);
+    } finally {
+      setLoadingGeneral(false);
     }
   };
 
   // Restaurar movimiento
   const handleRestore = async (id: string) => {
+    setLoadingGeneral(true);
     try {
       await updateDoc(doc(db, 'movements', id), { eliminado: false });
       toast.success('Movimiento restaurado');
     } catch (error) {
       toast.error('Error al restaurar');
       console.error(error);
+    } finally {
+      setLoadingGeneral(false);
     }
   };
 
@@ -160,6 +172,7 @@ export default function Dashboard() {
   const handleEditMovement = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editModal.movement) return;
+    setLoadingGeneral(true);
     try {
       await updateDoc(doc(db, 'movements', editModal.movement.id), {
         type: editModal.movement.type,
@@ -173,6 +186,8 @@ export default function Dashboard() {
     } catch (error) {
       toast.error('Error al actualizar el movimiento');
       console.error(error);
+    } finally {
+      setLoadingGeneral(false);
     }
   };
 
@@ -260,19 +275,19 @@ export default function Dashboard() {
 
   // Cambiar página
   const goToPage = (page: number) => {
-    if (page < 1) return;
-    if (page > currentPage) {
-      fetchPage(page, 'next');
-    } else if (page < currentPage) {
-      fetchPage(page, 'prev');
-    }
-    setCurrentPage(page);
+    setLoadingGeneral(true);
+    setTimeout(() => {
+      setCurrentPage(page);
+      setLoadingGeneral(false);
+    }, 400);
   };
 
   // Cambiar cantidad de filas
   const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setLoadingGeneral(true);
     setRowsPerPage(Number(e.target.value));
     setCurrentPage(1);
+    setTimeout(() => setLoadingGeneral(false), 400);
   };
 
   // Agrupar por fecha (día) para gráficas
@@ -294,9 +309,10 @@ export default function Dashboard() {
 
   return (
     <ProtectedRoute>
-      <div className="bg-gray-900 w-full">
-        <main className="w-full mx-auto py-6 px-2 sm:px-6 lg:px-8">
-          <div className="px-0 py-6 sm:px-0">
+      <div className="bg-gray-900 w-full p-2">
+        {loadingGeneral && <Spinner />}
+        <main className="w-full mx-auto py-6 px-2 lg:px-8">
+          <div className="px-0 sm:px-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-5 mb-4 sm:mb-8">
               <div className="bg-gray-800 border border-gray-700 overflow-hidden shadow rounded-lg">
                 <div className="px-4 py-5 sm:p-6">

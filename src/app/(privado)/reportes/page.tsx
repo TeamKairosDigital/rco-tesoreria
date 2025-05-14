@@ -287,7 +287,7 @@ export default function ReportesPage() {
                 className="w-full rounded-md border-gray-600 bg-gray-900 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
               />
             </div>
-            <div className="flex items-end space-x-2">
+            <div className="flex items-center justify-center sm:justify-end mt-2 sm:mt-0 space-x-2">
               <button
                 onClick={handleSearch}
                 className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
@@ -302,8 +302,8 @@ export default function ReportesPage() {
                 Limpiar Filtros
               </button>
             </div>
-            {role === 'admin' && (
-              <div className="flex items-center flex-wrap gap-4 mb-4 gap-2 mt-6">
+            {/* {role === 'admin' && (
+              <div className="flex items-center justify-center sm:justify-end flex-wrap gap-4 mb-4 gap-2 mt-6">
                 <label className="flex items-center space-x-2 text-gray-200">
                   <Switch
                     checked={showDeleted}
@@ -317,20 +317,20 @@ export default function ReportesPage() {
                   <span>Mostrar Eliminados</span>
                 </label>
               </div>
-            )}
+            )} */}
               {/* Botones de exportación */}
               {filteredMovements.length > 0 && (
-                <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 mb-2 sm:mb-4 items-end">
+                <div className="flex flex-col sm:flex-row flex-wrap gap-2 sm:gap-4 mb-2 sm:mb-4 items-center sm:items-end">
                   <button
                     onClick={handleExportExcel}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition cursor-pointer w-full sm:w-auto"
+                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition cursor-pointer w-50 sm:w-auto"
                   >
                     Exportar a Excel
                   </button>
                   <button
                     type="button"
                     onClick={handleExportPDF}
-                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition cursor-pointer w-full sm:w-auto"
+                    className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-semibold transition cursor-pointer w-50 sm:w-auto"
                   >
                     Exportar a PDF
                   </button>
@@ -472,7 +472,7 @@ export default function ReportesPage() {
                     Mostrando del {(currentPage - 1) * rowsPerPage + 1} al {Math.min(currentPage * rowsPerPage, filteredMovements.length)} de {filteredMovements.length} entradas
                   </span>
                   {/* Paginador */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 my-3 sm:my-0">
                     <button
                       onClick={() => setCurrentPage(1)}
                       disabled={currentPage === 1}
