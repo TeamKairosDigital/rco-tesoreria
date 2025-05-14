@@ -49,18 +49,18 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean, 
         <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700">
           <span className={`text-lg font-bold text-white transition-all duration-200 ${collapsed ? "hidden" : "block"}`}>Tesorería</span>
           <button
-            className="text-gray-400 hover:text-white focus:outline-none sm:hidden"
+            className="text-gray-400 hover:text-white focus:outline-none sm:hidden cursor-pointer"
             onClick={onClose}
             aria-label="Cerrar menú"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
           <button
-            className="text-gray-400 hover:text-white focus:outline-none hidden sm:block"
+            className="text-gray-400 hover:text-white focus:outline-none hidden sm:block cursor-pointer"
             onClick={() => setCollapsed((c) => !c)}
             aria-label="Colapsar menú"
           >
-            {collapsed ? <Bars3Icon className="h-6 w-6" /> : <XMarkIcon className="h-6 w-6" />}
+            {collapsed ? <Bars3Icon className="h-7 w-7" /> : <XMarkIcon className="h-7 w-7" />}
           </button>
         </div>
         <nav className="flex-1 py-4">

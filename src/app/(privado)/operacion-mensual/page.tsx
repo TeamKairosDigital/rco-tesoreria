@@ -9,6 +9,7 @@ import { format, startOfMonth, endOfMonth } from "date-fns";
 import { toast } from "react-hot-toast";
 import { Switch } from '@headlessui/react';
 import Header from '@/components/Header';
+import React from "react";
 
 interface Movement {
   id: string;
@@ -44,6 +45,7 @@ export default function OperacionMensualPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' }>({ key: '', direction: 'asc' });
   const [tooltip, setTooltip] = useState<{ open: boolean; text: string; x: number; y: number }>({ open: false, text: '', x: 0, y: 0 });
+  const [detailModal, setDetailModal] = useState<{ open: boolean; movement: Movement | null }>({ open: false, movement: null });
 
   useEffect(() => {
     const now = new Date();
@@ -128,6 +130,14 @@ export default function OperacionMensualPage() {
     }
   };
 
+  const handleShowDetails = (movement: Movement) => {
+    setDetailModal({ open: true, movement });
+  };
+
+  const closeDetailModal = () => {
+    setDetailModal({ open: false, movement: null });
+  };
+
   // Filtrado y ordenamiento
   const filteredMovements = movements.filter(m => {
     // Filtro por eliminados
@@ -150,8 +160,16 @@ export default function OperacionMensualPage() {
   // Ordenamiento
   const sortedMovements = [...filteredMovements].sort((a, b) => {
     if (!sortConfig.key) return 0;
+    
+    if (sortConfig.key === 'date') {
+      const dateA = new Date(a.date).getTime();
+      const dateB = new Date(b.date).getTime();
+      return sortConfig.direction === 'asc' ? dateA - dateB : dateB - dateA;
+    }
+
     const aValue = a[sortConfig.key as keyof Movement];
     const bValue = b[sortConfig.key as keyof Movement];
+    
     if (typeof aValue === 'number' && typeof bValue === 'number') {
       return sortConfig.direction === 'asc' ? aValue - bValue : bValue - aValue;
     }
@@ -181,11 +199,6 @@ export default function OperacionMensualPage() {
       return { key, direction: 'asc' };
     });
   };
-
-  const handleTooltip = (e: React.MouseEvent, text: string) => {
-    setTooltip({ open: true, text, x: e.clientX, y: e.clientY });
-  };
-  const closeTooltip = () => setTooltip({ open: false, text: '', x: 0, y: 0 });
 
   return (
     <ProtectedRoute>
@@ -328,11 +341,10 @@ export default function OperacionMensualPage() {
                           (movement.nota && movement.nota.length > 25) ? (
                             <>
                               {movement.nota.slice(0, 25)}...
-                              <EyeIcon
+                              {/* <EyeIcon
                                 className="inline h-4 w-4 ml-1 text-indigo-400 cursor-pointer"
-                                onMouseEnter={e => handleTooltip(e, movement.nota!)}
-                                onMouseLeave={closeTooltip}
-                              />
+                                onClick={() => handleShowDetails(movement)}
+                              /> */}
                             </>
                           ) : (movement.nota || '-')
                         ) : '-'}
@@ -341,83 +353,119 @@ export default function OperacionMensualPage() {
                         {movement.description.length > 25 ? (
                           <>
                             {movement.description.slice(0, 25)}...
-                            <EyeIcon
+                            {/* <EyeIcon
                               className="inline h-4 w-4 ml-1 text-indigo-400 cursor-pointer"
-                              onMouseEnter={e => handleTooltip(e, movement.description)}
-                              onMouseLeave={closeTooltip}
-                            />
+                              onClick={() => handleShowDetails(movement)}
+                            /> */}
                           </>
                         ) : movement.description}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-gray-200">{movement.date.toLocaleDateString()}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-gray-400">{movement.user}</td>
-                      {role === 'admin' && (
                         <td className="px-6 py-4 whitespace-nowrap flex gap-2">
-                          {!movement.eliminado && (
-                            <>
-                              <button
-                                className="text-indigo-400 hover:text-indigo-600 font-bold cursor-pointer"
-                                title="Editar"
-                                onClick={() => handleEditMovement(movement)}
-                              >
-                                <PencilSquareIcon className="h-5 w-5" />
-                              </button>
-                              <button
-                                className="text-red-400 hover:text-red-600 font-bold cursor-pointer"
-                                title="Eliminar"
-                                onClick={() => handleDeleteRestoreClick(movement, 'delete')}
-                              >
-                                <TrashIcon className="h-5 w-5" />
-                              </button>
-                            </>
-                          )}
-                          {movement.eliminado && (
-                            <button
-                              className="text-green-400 hover:text-green-600 font-bold cursor-pointer"
-                              title="Restaurar"
-                              onClick={() => handleDeleteRestoreClick(movement, 'restore')}
-                            >Restaurar</button>
+                          <button
+                            onClick={() => handleShowDetails(movement)}
+                            className="text-indigo-400 hover:text-indigo-300 mr-3 cursor-pointer"
+                            >
+                              <EyeIcon className="h-5 w-5" />
+                          </button>
+                          {role === 'admin' && (
+                            <div>
+                              {!movement.eliminado && (
+                                <>
+                                  <button
+                                    className="text-indigo-400 hover:text-indigo-600 font-bold mr-3 cursor-pointer"
+                                    title="Editar"
+                                    onClick={() => handleEditMovement(movement)}
+                                  >
+                                    <PencilSquareIcon className="h-5 w-5" />
+                                  </button>
+                                  <button
+                                    className="text-red-400 hover:text-red-600 font-bold mr-3 cursor-pointer"
+                                    title="Eliminar"
+                                    onClick={() => handleDeleteRestoreClick(movement, 'delete')}
+                                  >
+                                    <TrashIcon className="h-5 w-5" />
+                                  </button>
+                                </>
+                              )}
+                              {movement.eliminado && (
+                                <button
+                                  className="text-green-400 hover:text-green-600 font-bold cursor-pointer"
+                                  title="Restaurar"
+                                  onClick={() => handleDeleteRestoreClick(movement, 'restore')}
+                                >Restaurar</button>
+                              )}
+                            </div>
                           )}
                         </td>
-                      )}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <div className="flex flex-col sm:flex-row justify-between items-center mt-2 sm:mt-4 gap-2">
-              <div>
-                <label className="block text-sm text-gray-300 mb-1">Filas por página</label>
-                <select
-                  value={rowsPerPage}
-                  onChange={e => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); }}
-                  className="rounded-md border-gray-600 bg-gray-900 text-gray-100 px-3 py-2"
-                >
-                  {[5, 10, 20, 50].map(n => <option key={n} value={n}>{n}</option>)}
-                </select>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className={`px-2 py-1 rounded bg-gray-700 text-gray-200 flex items-center cursor-pointer ${currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  title="Anterior"
-                >
-                  <ChevronLeftIcon className="h-5 w-5" />
-                  <span className="sr-only">Anterior</span>
-                </button>
-                <span className="text-gray-300 text-sm mx-2">Página {currentPage} de {totalPages}</span>
-                <button
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className={`px-2 py-1 rounded bg-gray-700 text-gray-200 flex items-center cursor-pointer ${currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  title="Siguiente"
-                >
-                  <ChevronRightIcon className="h-5 w-5" />
-                  <span className="sr-only">Siguiente</span>
-                </button>
-              </div>
-            </div>
+                {/* Paginación y selector de filas por página debajo de la tabla, bien alineados */}
+                <div className="flex flex-col sm:flex-row justify-between items-center mt-2 sm:mt-4 gap-2">
+                  {/* Texto de rango */}
+                  <span className="text-gray-300 text-sm mx-2">
+                    Mostrando del {(currentPage - 1) * rowsPerPage + 1} al {Math.min(currentPage * rowsPerPage, filteredMovements.length)} de {filteredMovements.length} entradas
+                  </span>
+                  {/* Paginador */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage(1)}
+                      disabled={currentPage === 1}
+                      className={`px-2 py-1 rounded ${currentPage === 1 ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
+                      title="Primera"
+                    >«</button>
+                    <button
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className={`px-2 py-1 rounded ${currentPage === 1 ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
+                      title="Anterior"
+                    >‹</button>
+                    {/* Números de página */}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                      .filter(page =>
+                        page === 1 ||
+                        page === totalPages ||
+                        (page >= currentPage - 2 && page <= currentPage + 2)
+                      )
+                      .map((page, idx, arr) => (
+                        <React.Fragment key={page}>
+                          {idx > 0 && page - arr[idx - 1] > 1 && <span className="px-1 text-gray-400">...</span>}
+                          <button
+                            onClick={() => setCurrentPage(page)}
+                            className={`px-3 py-1 rounded-full ${currentPage === page ? 'bg-white text-gray-900 font-bold' : 'bg-gray-800 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
+                          >
+                            {page}
+                          </button>
+                        </React.Fragment>
+                      ))}
+                    <button
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className={`px-2 py-1 rounded ${currentPage === totalPages ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
+                      title="Siguiente"
+                    >›</button>
+                    <button
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={currentPage === totalPages}
+                      className={`px-2 py-1 rounded ${currentPage === totalPages ? 'bg-gray-700 text-gray-400 cursor-not-allowed' : 'bg-gray-700 text-gray-200 hover:bg-gray-600 cursor-pointer'}`}
+                      title="Última"
+                    >»</button>
+                  </div>
+                  {/* Selector de filas por página */}
+                  <div>
+                    <select
+                      value={rowsPerPage}
+                      onChange={e => { setRowsPerPage(Number(e.target.value)); setCurrentPage(1); }}
+                      className="rounded-md border-gray-600 bg-gray-900 text-gray-100 px-3 py-2 cursor-pointer"
+                    >
+                      {[5, 10, 20, 50].map(n => <option key={n} value={n}>{n}</option>)}
+                    </select>
+                  </div>
+                </div>
           </div>
         </div>
 
@@ -625,6 +673,50 @@ export default function OperacionMensualPage() {
           </div>
         )}
         
+        {/* Modal de Detalles */}
+        {detailModal.open && detailModal.movement && (
+          <div className="fixed inset-0 bg-black/75 bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-gray-800 rounded-lg p-6 max-w-lg w-full mx-4">
+              <div className="flex justify-between items-start mb-4">
+                <h3 className="text-xl font-semibold text-white">Detalles del Movimiento</h3>
+                <button
+                  onClick={closeDetailModal}
+                  className="text-gray-400 hover:text-white cursor-pointer"
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-gray-400">Fecha</p>
+                  <p className="text-white">{format(detailModal.movement.date, 'dd/MM/yyyy')}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400">Tipo</p>
+                  <p className="text-white">{detailModal.movement.type === 'ingreso' ? 'Ingreso' : 'Egreso'}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400">Monto</p>
+                  <p className="text-white">${detailModal.movement.amount.toFixed(2)}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400">Categoría</p>
+                  <p className="text-white">{detailModal.movement.categoria || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400">Nota</p>
+                  <p className="text-white">{detailModal.movement.nota || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400">Descripción</p>
+                  <p className="text-white">{detailModal.movement.description}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </ProtectedRoute>
   );
