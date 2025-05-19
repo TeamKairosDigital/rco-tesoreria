@@ -503,7 +503,7 @@ export default function OperacionMensualPage() {
                   <select
                     value={newMovement.type}
                     onChange={(e) => setNewMovement({ ...newMovement, type: e.target.value as 'ingreso' | 'egreso' })}
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-900 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
+                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-900 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 cursor-pointer"
                   >
                     <option value="ingreso">Ingreso</option>
                     <option value="egreso">Egreso</option>
@@ -525,7 +525,7 @@ export default function OperacionMensualPage() {
                   <select
                     value={newMovement.categoria}
                     onChange={(e) => setNewMovement({ ...newMovement, categoria: e.target.value, nota: '' })}
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-900 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
+                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-900 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 cursor-pointer"
                   >
                     <option value="Diezmo">Diezmo</option>
                     <option value="Ofrenda">Ofrenda</option>
@@ -583,7 +583,7 @@ export default function OperacionMensualPage() {
                   <select
                     value={editMovement.type}
                     onChange={(e) => setEditMovement({ ...editMovement, type: e.target.value as 'ingreso' | 'egreso' })}
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-900 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
+                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-900 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 cursor-pointer"
                   >
                     <option value="ingreso">Ingreso</option>
                     <option value="egreso">Egreso</option>
@@ -605,7 +605,7 @@ export default function OperacionMensualPage() {
                   <select
                     value={editMovement.categoria}
                     onChange={(e) => setEditMovement({ ...editMovement, categoria: e.target.value, nota: '' })}
-                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-900 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
+                    className="mt-1 block w-full rounded-md border-gray-600 bg-gray-900 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 cursor-pointer"
                   >
                     <option value="Diezmo">Diezmo</option>
                     <option value="Ofrenda">Ofrenda</option>
@@ -668,7 +668,7 @@ export default function OperacionMensualPage() {
                 <button
                   type="button"
                   onClick={() => { setShowConfirmModal(false); setMovementToDelete(null); }}
-                  className="bg-gray-600 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded-md text-sm font-semibold transition"
+                  className="bg-gray-600 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded-md text-sm font-semibold transition cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -679,7 +679,7 @@ export default function OperacionMensualPage() {
                     movementToDelete.action === 'delete' 
                       ? 'bg-red-600 hover:bg-red-700' 
                       : 'bg-green-600 hover:bg-green-700'
-                  } text-white px-4 py-2 rounded-md text-sm font-semibold transition`}
+                  } text-white px-4 py-2 rounded-md text-sm font-semibold transition cursor-pointer`}
                 >
                   {movementToDelete.action === 'delete' ? 'Eliminar' : 'Restaurar'}
                 </button>

@@ -255,7 +255,7 @@ export default function ReportesPage() {
               <select
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value as 'todos' | 'ingreso' | 'egreso')}
-                className="w-full rounded-md border-gray-600 bg-gray-900 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
+                className="w-full rounded-md border-gray-600 bg-gray-900 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 cursor-pointer"
               >
                 <option value="todos">Todos</option>
                 <option value="ingreso">Ingresos</option>
@@ -267,7 +267,7 @@ export default function ReportesPage() {
               <select
                 value={selectedCategory}
                 onChange={(e) => { setSelectedCategory(e.target.value); setCurrentPage(1); }}
-                className="w-full rounded-md border-gray-600 bg-gray-900 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2"
+                className="w-full rounded-md border-gray-600 bg-gray-900 text-gray-100 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 cursor-pointer"
               >
                 <option value="todos">Todas</option>
                 <option value="Diezmo">Diezmo</option>
@@ -290,14 +290,14 @@ export default function ReportesPage() {
             <div className="flex items-center justify-center sm:justify-end mt-2 sm:mt-0 space-x-2">
               <button
                 onClick={handleSearch}
-                className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors"
+                className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors cursor-pointer"
                 disabled={loading}
               >
                 {loading ? 'Buscando...' : 'Buscar'}
               </button>
               <button
                 onClick={handleClearFilters}
-                className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
+                className="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors cursor-pointer"
               >
                 Limpiar Filtros
               </button>

@@ -51,11 +51,7 @@ export default function Dashboard() {
 
   // Estados para paginación
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [lastVisible, setLastVisible] = useState<any>(null);
-  const [firstVisible, setFirstVisible] = useState<any>(null);
-  const [pageSnapshots, setPageSnapshots] = useState<any[]>([]); // Para retroceder páginas
-  const [loadingPage, setLoadingPage] = useState(false);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   // Estado para mostrar/ocultar eliminados (solo admin)
   const [showDeleted, setShowDeleted] = useState(false);
@@ -67,8 +63,8 @@ export default function Dashboard() {
   const [tooltip, setTooltip] = useState<{ open: boolean; text: string; x: number; y: number }>({ open: false, text: '', x: 0, y: 0 });
 
   // Estados para filtros avanzados
-  const [filterCategoria, setFilterCategoria] = useState<string>('Todas');
-  const [filterSearch, setFilterSearch] = useState<string>('');
+  const [filterCategoria, setFilterCategoria] = useState('Todas');
+  const [filterSearch, setFilterSearch] = useState('');
 
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false);
 
@@ -92,7 +88,7 @@ export default function Dashboard() {
   const handleFilterChange = (startDate: Date | null, endDate: Date | null, categoria: string, search: string) => {
     setFilterCategoria(categoria);
     setFilterSearch(search);
-    let filtered = movements;
+    let filtered = [...movements];
     if (startDate) {
       filtered = filtered.filter(movement => movement.date >= startDate);
     }
@@ -191,25 +187,17 @@ export default function Dashboard() {
     }
   };
 
-  const totalIngresos = visibleMovements
-    .filter(m => m.type === 'ingreso')
-    .reduce((acc, curr) => acc + curr.amount, 0);
-
-  const totalEgresos = visibleMovements
-    .filter(m => m.type === 'egreso')
-    .reduce((acc, curr) => acc + curr.amount, 0);
-
+  // Calcular totales históricos (sin filtros)
+  const totalesHistoricos = movements.filter(m => !m.eliminado);
+  const totalIngresos = totalesHistoricos.filter(m => m.type === 'ingreso').reduce((acc, curr) => acc + curr.amount, 0);
+  const totalEgresos = totalesHistoricos.filter(m => m.type === 'egreso').reduce((acc, curr) => acc + curr.amount, 0);
   const saldo = totalIngresos - totalEgresos;
 
-  // Calcular movimientos a mostrar
-  const totalPages = Math.ceil(visibleMovements.length / rowsPerPage);
-  const paginatedMovements = visibleMovements.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
+  // Usar filteredMovements solo para las gráficas y la tabla
+  const visibleMovementsForTable = filteredMovements.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   // Ordenar movimientos
-  const sortedMovements = [...paginatedMovements].sort((a, b) => {
+  const sortedMovements = [...visibleMovementsForTable].sort((a, b) => {
     if (!sortConfig.key) return 0;
     const aValue = a[sortConfig.key as keyof Movement] || '';
     const bValue = b[sortConfig.key as keyof Movement] || '';
@@ -235,77 +223,22 @@ export default function Dashboard() {
   };
   const closeTooltip = () => setTooltip({ open: false, text: '', x: 0, y: 0 });
 
-  // Nueva función para cargar una página específica
-  const fetchPage = async (page: number, direction: 'next' | 'prev' | 'init' = 'init') => {
-    setLoadingPage(true);
-    let q;
-    if (direction === 'next' && lastVisible) {
-      q = query(collection(db, 'movements'), orderBy('date', 'desc'), startAfter(lastVisible), limit(rowsPerPage));
-    } else if (direction === 'prev' && pageSnapshots[page - 2]) {
-      q = query(collection(db, 'movements'), orderBy('date', 'desc'), startAfter(pageSnapshots[page - 2]), limit(rowsPerPage));
-    } else {
-      q = query(collection(db, 'movements'), orderBy('date', 'desc'), limit(rowsPerPage));
-    }
-    const snapshot = await getDocs(q);
-    const docs = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      date: doc.data().date ? doc.data().date.toDate() : new Date(),
-      eliminado: doc.data().eliminado || false,
-    })) as Movement[];
-    setMovements(docs);
-    setFilteredMovements(docs);
-    setFirstVisible(snapshot.docs[0]);
-    setLastVisible(snapshot.docs[snapshot.docs.length - 1]);
-    if (direction === 'next') {
-      setPageSnapshots(prev => [...prev, snapshot.docs[0]]);
-    } else if (direction === 'prev') {
-      setPageSnapshots(prev => prev.slice(0, -1));
-    } else if (direction === 'init') {
-      setPageSnapshots([snapshot.docs[0]]);
-    }
-    setLoadingPage(false);
-  };
-
-  // useEffect para cargar la primera página al montar
-  useEffect(() => {
-    fetchPage(1, 'init');
-    // eslint-disable-next-line
-  }, [rowsPerPage]);
-
-  // Cambiar página
-  const goToPage = (page: number) => {
-    setLoadingGeneral(true);
-    setTimeout(() => {
-      setCurrentPage(page);
-      setLoadingGeneral(false);
-    }, 400);
-  };
-
-  // Cambiar cantidad de filas
-  const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setLoadingGeneral(true);
-    setRowsPerPage(Number(e.target.value));
-    setCurrentPage(1);
-    setTimeout(() => setLoadingGeneral(false), 400);
-  };
-
-  // Agrupar por fecha (día) para gráficas
-  const dataByDate: Record<string, { ingresos: number; egresos: number; saldo: number }> = {};
-  let saldoAcumulado = 0;
-  visibleMovements.filter(m => !m.eliminado).forEach((m) => {
-    const fecha = format(m.date, "dd/MM/yyyy");
-    if (!dataByDate[fecha]) dataByDate[fecha] = { ingresos: 0, egresos: 0, saldo: 0 };
+  // Agrupar por mes para gráficas
+  const dataByMonth: Record<string, { ingresos: number; egresos: number; saldo: number }> = {};
+  let saldoAcumuladoMes = 0;
+  totalesHistoricos.forEach((m) => {
+    const mes = format(m.date, "MM/yyyy");
+    if (!dataByMonth[mes]) dataByMonth[mes] = { ingresos: 0, egresos: 0, saldo: 0 };
     if (m.type === "ingreso") {
-      dataByDate[fecha].ingresos += m.amount;
-      saldoAcumulado += m.amount;
+      dataByMonth[mes].ingresos += m.amount;
+      saldoAcumuladoMes += m.amount;
     } else {
-      dataByDate[fecha].egresos += m.amount;
-      saldoAcumulado -= m.amount;
+      dataByMonth[mes].egresos += m.amount;
+      saldoAcumuladoMes -= m.amount;
     }
-    dataByDate[fecha].saldo = saldoAcumulado;
+    dataByMonth[mes].saldo = saldoAcumuladoMes;
   });
-  const chartData = Object.entries(dataByDate).map(([fecha, valores]) => ({ fecha, ...valores }));
+  const chartData = Object.entries(dataByMonth).map(([mes, valores]) => ({ mes, ...valores }));
 
   return (
     <ProtectedRoute>
@@ -339,7 +272,7 @@ export default function Dashboard() {
                 <ResponsiveContainer width="100%" height={250}>
                   <BarChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="fecha" stroke="#cbd5e1" />
+                    <XAxis dataKey="mes" stroke="#cbd5e1" />
                     <YAxis stroke="#cbd5e1" />
                     <Tooltip contentStyle={{ background: '#1f2937', color: '#fff', border: '1px solid #374151' }} />
                     <Legend />
@@ -353,7 +286,7 @@ export default function Dashboard() {
                 <ResponsiveContainer width="100%" height={250}>
                   <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                    <XAxis dataKey="fecha" stroke="#cbd5e1" />
+                    <XAxis dataKey="mes" stroke="#cbd5e1" />
                     <YAxis stroke="#cbd5e1" />
                     <Tooltip contentStyle={{ background: '#1f2937', color: '#fff', border: '1px solid #374151' }} />
                     <Legend />
