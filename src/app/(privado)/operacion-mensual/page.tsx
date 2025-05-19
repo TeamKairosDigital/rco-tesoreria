@@ -267,6 +267,7 @@ export default function OperacionMensualPage() {
                       <option value="Todos">Todas</option>
                       <option value="Diezmo">Diezmo</option>
                       <option value="Ofrenda">Ofrenda</option>
+                      <option value="Talento/cocina">Talento/cocina</option>
                       <option value="Otro">Otro</option>
                     </select>
                   </div>
@@ -529,6 +530,7 @@ export default function OperacionMensualPage() {
                   >
                     <option value="Diezmo">Diezmo</option>
                     <option value="Ofrenda">Ofrenda</option>
+                    <option value="Talento/cocina">Talento/cocina</option>
                     <option value="Otro">Otro</option>
                   </select>
                 </div>
@@ -609,6 +611,7 @@ export default function OperacionMensualPage() {
                   >
                     <option value="Diezmo">Diezmo</option>
                     <option value="Ofrenda">Ofrenda</option>
+                    <option value="Talento/cocina">Talento/cocina</option>
                     <option value="Otro">Otro</option>
                   </select>
                 </div>

@@ -272,6 +272,7 @@ export default function ReportesPage() {
                 <option value="todos">Todas</option>
                 <option value="Diezmo">Diezmo</option>
                 <option value="Ofrenda">Ofrenda</option>
+                <option value="Talento/cocina">Talento/cocina</option>
                 <option value="Otro">Otro</option>
               </select>
             </div>
