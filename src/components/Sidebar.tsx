@@ -2,7 +2,15 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { ChartBarIcon, HomeIcon, Bars3Icon, XMarkIcon, DocumentTextIcon } from "@heroicons/react/24/outline";
+import { 
+  ChartBarIcon, 
+  HomeIcon, 
+  Bars3Icon, 
+  XMarkIcon, 
+  DocumentTextIcon,
+  CreditCardIcon, 
+  ArchiveBoxIcon
+} from "@heroicons/react/24/outline";
 
 export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean, onClose: () => void }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -23,11 +31,16 @@ export default function Sidebar({ mobileOpen, onClose }: { mobileOpen: boolean, 
       href: "/operacion-mensual",
       icon: Bars3Icon,
     },
-    // {
-    //   name: "Gráficas",
-    //   href: "/graficas",
-    //   icon: ChartBarIcon,
-    // },
+    {
+      name: "Deudas",
+      href: "/deudas",
+      icon: CreditCardIcon,
+    },
+    {
+      name: "Inventariado",
+      href: "/inventario",
+      icon: ArchiveBoxIcon,
+    },
     {
       name: "Reportes",
       href: "/reportes",
