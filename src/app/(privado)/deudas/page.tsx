@@ -49,7 +49,7 @@ export default function DeudasPage() {
         </div>
         <div className="bg-gray-800 rounded-lg p-4 shadow-lg text-center">
           <p className="text-gray-400 text-sm">Total Pendiente</p>
-          <p className="text-red-500 text-2xl font-bold">{formatCurrency(totalPendiente)}</p>
+          <p className="text-red-400 text-2xl font-bold">{formatCurrency(totalPendiente)}</p>
         </div>
         <div className="bg-gray-800 rounded-lg p-4 shadow-lg text-center">
           <p className="text-gray-400 text-sm">Total Abonado</p>

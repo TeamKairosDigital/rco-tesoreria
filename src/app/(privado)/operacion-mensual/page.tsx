@@ -54,7 +54,7 @@ export default function OperacionMensualPage() {
     const monthStart = startOfMonth(now);
     const monthEnd = endOfMonth(now);
 
-    const q = query(collection(db, 'movements'), orderBy('date', 'asc'));
+    const q = query(collection(db, 'movements'), orderBy('date', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({
         id: doc.id,

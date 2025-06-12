@@ -17,7 +17,7 @@ export default function DeudaHistoryModal({ isOpen, onClose, deuda }: DeudaHisto
   const totalAbonado = deuda.abonos.reduce((sum, abono) => sum + abono.cantidad, 0);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/75 bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-800 rounded-lg p-6 w-full max-w-2xl overflow-y-auto max-h-[90vh]">
         <h2 className="text-2xl font-semibold text-white mb-4">Historial de Abonos - {deuda.nombre}</h2>
 
@@ -60,7 +60,7 @@ export default function DeudaHistoryModal({ isOpen, onClose, deuda }: DeudaHisto
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-200 bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            className="px-4 py-2 text-sm font-medium text-gray-200 bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 cursor-pointer"
           >
             Cerrar
           </button>

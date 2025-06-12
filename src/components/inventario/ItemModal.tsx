@@ -77,7 +77,7 @@ export default function ItemModal({ isOpen, onClose, onSuccess, item, areas, cat
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/75 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-md max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold mb-4 text-white">
           {item ? 'Editar Elemento' : 'Añadir Elemento'}
@@ -125,7 +125,7 @@ export default function ItemModal({ isOpen, onClose, onSuccess, item, areas, cat
                 setAreaId(e.target.value || undefined);
                 setCategoryId(undefined); // Reset category when area changes
               }}
-              className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               disabled={isLoading}
             >
               <option value="">Selecciona un Área</option>
@@ -145,7 +145,7 @@ export default function ItemModal({ isOpen, onClose, onSuccess, item, areas, cat
               id="category"
               value={categoryId || ''}
               onChange={(e) => setCategoryId(e.target.value || undefined)}
-              className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               disabled={isLoading || !areaId}
             >
               <option value="">Selecciona una Categoría</option>
@@ -191,14 +191,14 @@ export default function ItemModal({ isOpen, onClose, onSuccess, item, areas, cat
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 cursor-pointer"
               disabled={isLoading}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
               disabled={isLoading}
             >
               {isLoading ? 'Guardando...' : item ? 'Actualizar' : 'Crear'}

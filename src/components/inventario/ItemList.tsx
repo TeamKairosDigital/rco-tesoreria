@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import { Item, Area, Category } from '@/models/inventory';
+import { PencilIcon, TrashIcon } from '@heroicons/react/24/solid';
 
 interface ItemListProps {
   items: Item[];
@@ -8,9 +9,10 @@ interface ItemListProps {
   categories: Category[];
   onEditItem: (item: Item) => void;
   onItemDeleted: () => void;
+  onDeleteItem: (item: Item) => void;
 }
 
-export default function ItemList({ items, areas, categories, onEditItem, onItemDeleted }: ItemListProps) {
+export default function ItemList({ items, areas, categories, onEditItem, onItemDeleted, onDeleteItem }: ItemListProps) {
   const getAreaName = (areaId: string) => {
     const area = areas.find(a => a.id === areaId);
     return area ? area.name : 'Desconocida';
@@ -27,7 +29,7 @@ export default function ItemList({ items, areas, categories, onEditItem, onItemD
       {items.length === 0 ? (
         <p className="text-gray-400">No hay elementos en el inventario.</p>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-7">
           {items.map(item => (
             <div key={item.id} className="bg-gray-700 p-4 rounded-md shadow-md">
               <h3 className="text-xl font-semibold text-white mb-1">{item.name}</h3>
@@ -36,19 +38,20 @@ export default function ItemList({ items, areas, categories, onEditItem, onItemD
               <p className="text-gray-300 mb-2">{item.description}</p>
               <p className="text-white font-medium">Cantidad: {item.quantity}</p>
               {item.notes && <p className="text-gray-500 text-sm mt-1">Notas: {item.notes}</p>}
-              <div className="mt-4 flex space-x-2">
+              <div className="mt-4 flex justify-end space-x-2">
                 <button
                   onClick={() => onEditItem(item)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-1 px-3 rounded focus:outline-none focus:shadow-outline"
+                  className="text-blue-400 hover:text-blue-300 p-1 rounded-full hover:bg-gray-600 transition-colors duration-200 cursor-pointer"
+                  title="Editar"
                 >
-                  Editar
+                  <PencilIcon className="h-5 w-5" />
                 </button>
-                {/* Botón de eliminar, la lógica de eliminación se implementará aquí o se pasará a un modal de confirmación */}
                 <button
-                  onClick={() => console.log('Eliminar', item.id)} // Placeholder for delete action
-                  className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1 px-3 rounded focus:outline-none focus:shadow-outline"
+                  onClick={() => onDeleteItem(item)}
+                  className="text-red-400 hover:text-red-300 p-1 rounded-full hover:bg-gray-600 transition-colors duration-200 cursor-pointer"
+                  title="Eliminar"
                 >
-                  Eliminar
+                  <TrashIcon className="h-5 w-5" />
                 </button>
               </div>
             </div>

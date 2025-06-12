@@ -62,14 +62,14 @@ export default function CategoryList({ categories, areas, onEdit, onCategoryDele
               <div className="flex space-x-2">
                 <button
                   onClick={() => onEdit(category)}
-                  className="p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  className="p-2 rounded-full bg-blue-600 hover:bg-blue-700 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 cursor-pointer"
                   title="Editar Categoría"
                 >
                   <PencilIcon className="h-5 w-5" />
                 </button>
                 <button
                   onClick={() => handleDeleteClick(category)}
-                  className="p-2 rounded-full bg-red-600 hover:bg-red-700 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  className="p-2 rounded-full bg-red-600 hover:bg-red-700 text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 cursor-pointer"
                   title="Eliminar Categoría"
                   disabled={isLoading}
                 >

@@ -140,7 +140,7 @@ export default function DeudaList({ deudas, onDeudaUpdated }: DeudaListProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-between items-center">
+      <div className="block md:flex justify-between items-center">
         <h2 className="text-2xl font-bold text-white">Deudas</h2>
         <div className="space-x-2">
           <button
@@ -148,13 +148,13 @@ export default function DeudaList({ deudas, onDeudaUpdated }: DeudaListProps) {
               setSelectedDeuda(null);
               setIsDeudaModalOpen(true);
             }}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            className="px-4 py-2 my-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
           >
             Nueva Deuda
           </button>
           <button
             onClick={generateGeneralPDF}
-            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            className="px-4 py-2 my-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-400 cursor-pointer"
           >
             Generar PDF General
           </button>
@@ -169,7 +169,7 @@ export default function DeudaList({ deudas, onDeudaUpdated }: DeudaListProps) {
           >
             <button
               onClick={() => handleDeleteClick(deuda)}
-              className="absolute top-2 right-2 text-red-400 hover:text-red-300 focus:outline-none"
+              className="absolute top-2 right-2 text-red-400 hover:text-red-300 focus:outline-none cursor-pointer"
               title="Eliminar Deuda"
             >
               <TrashIcon className="h-5 w-5" />
@@ -191,7 +191,7 @@ export default function DeudaList({ deudas, onDeudaUpdated }: DeudaListProps) {
             <div className="grid grid-cols-2 gap-2 mt-4">
               <button
                 onClick={() => handleEdit(deuda)}
-                className="flex flex-col items-center justify-center p-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                className="flex flex-col items-center justify-center p-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 cursor-pointer"
                 title="Editar Deuda"
               >
                 <PencilIcon className="h-5 w-5 mb-1" />
@@ -199,7 +199,7 @@ export default function DeudaList({ deudas, onDeudaUpdated }: DeudaListProps) {
               </button>
               <button
                 onClick={() => handleAbono(deuda)}
-                className="flex flex-col items-center justify-center p-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="flex flex-col items-center justify-center p-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer"
                 title="Abonar"
               >
                 <CurrencyDollarIcon className="h-5 w-5 mb-1" />
@@ -207,7 +207,7 @@ export default function DeudaList({ deudas, onDeudaUpdated }: DeudaListProps) {
               </button>
               <button
                 onClick={() => handleViewHistory(deuda)}
-                className="flex flex-col items-center justify-center p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 col-span-1"
+                className="flex flex-col items-center justify-center p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 col-span-1 cursor-pointer"
                 title="Ver Historial"
               >
                 <ListBulletIcon className="h-5 w-5 mb-1" />
@@ -215,7 +215,7 @@ export default function DeudaList({ deudas, onDeudaUpdated }: DeudaListProps) {
               </button>
               <button
                 onClick={() => generatePDF(deuda)}
-                className="flex flex-col items-center justify-center p-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 col-span-1"
+                className="flex flex-col items-center justify-center p-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 col-span-1 cursor-pointer"
                 title="Generar PDF"
               >
                 <DocumentArrowDownIcon className="h-5 w-5 mb-1" />
@@ -270,11 +270,10 @@ export default function DeudaList({ deudas, onDeudaUpdated }: DeudaListProps) {
         onClose={() => {
           setIsConfirmModalOpen(false);
           setSelectedDeuda(null);
-        }}
+        } }
         onConfirm={handleConfirmDelete}
         title="Confirmar Eliminación"
-        message={`¿Estás seguro de que deseas eliminar la deuda "${selectedDeuda?.nombre || ''}"? Esta acción no se puede deshacer.`}
-      />
+        message={`¿Estás seguro de que deseas eliminar la deuda "${selectedDeuda?.nombre || ''}"? Esta acción no se puede deshacer.`} isLoading={false}      />
     </div>
   );
 } 

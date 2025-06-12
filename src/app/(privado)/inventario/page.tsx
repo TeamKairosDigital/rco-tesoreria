@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Area, Category, Item, getAreas, getCategories, getItems, deleteArea, deleteCategory } from '@/models/inventory';
+import { Area, Category, Item, getAreas, getCategories, getItems, deleteArea, deleteCategory, deleteItem } from '@/models/inventory';
 import ItemModal from '@/components/inventario/ItemModal';
 import AreaModal from '@/components/inventario/AreaModal';
 import CategoryModal from '@/components/inventario/CategoryModal';
@@ -27,6 +27,10 @@ export default function InventarioPage() {
 
   const [showAreaManagement, setShowAreaManagement] = useState(false);
   const [showCategoryManagement, setShowCategoryManagement] = useState(false);
+
+  // Estado para el modal de confirmación de eliminación de item
+  const [isConfirmItemModalOpen, setIsConfirmItemModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<Item | null>(null);
 
   const fetchAreas = useCallback(async () => {
     try {
@@ -85,6 +89,26 @@ export default function InventarioPage() {
     fetchItems(); // Re-fetch items as they might depend on categories
   };
 
+  const handleDeleteItemClick = (item: Item) => {
+    setItemToDelete(item);
+    setIsConfirmItemModalOpen(true);
+  };
+
+  const handleConfirmDeleteItem = async () => {
+    if (itemToDelete && itemToDelete.id) {
+      try {
+        await deleteItem(itemToDelete.id);
+        toast.success('Elemento eliminado exitosamente');
+        fetchItems(); // Actualizar la lista de items
+        setIsConfirmItemModalOpen(false);
+        setItemToDelete(null);
+      } catch (error) {
+        console.error('Error deleting item:', error);
+        toast.error('Error al eliminar el elemento');
+      }
+    }
+  };
+
   return (
     <div className="space-y-6 p-6 bg-gray-900 min-h-screen text-white">
       <h1 className="text-3xl font-bold mb-6">Gestión de Inventario</h1>
@@ -93,19 +117,19 @@ export default function InventarioPage() {
       <div className="flex flex-wrap gap-4 mb-6">
         <button
           onClick={() => { setSelectedItem(null); setIsItemModalOpen(true); setShowAreaManagement(false); setShowCategoryManagement(false); }}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline cursor-pointer"
         >
           Añadir Elemento
         </button>
         <button
           onClick={() => { setShowAreaManagement(true); setShowCategoryManagement(false); setSelectedAreaToEdit(null); setIsAreaModalOpen(false); }}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline cursor-pointer"
         >
           Gestionar Áreas
         </button>
         <button
           onClick={() => { setShowCategoryManagement(true); setShowAreaManagement(false); setSelectedCategoryToEdit(null); setIsCategoryModalOpen(false); }}
-          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+          className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline cursor-pointer"
         >
           Gestionar Categorías
         </button>
@@ -118,7 +142,7 @@ export default function InventarioPage() {
             <h2 className="text-2xl font-bold text-white">Gestión de Áreas</h2>
             <button
               onClick={() => { setSelectedAreaToEdit(null); setIsAreaModalOpen(true); }}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline cursor-pointer"
             >
               Añadir Área
             </button>
@@ -126,7 +150,7 @@ export default function InventarioPage() {
           <AreaList areas={areas} onEdit={(area) => { setSelectedAreaToEdit(area); setIsAreaModalOpen(true); }} onAreaDeleted={handleAreaUpdated} />
           <button
             onClick={() => setShowAreaManagement(false)}
-            className="mt-4 px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            className="mt-4 px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 cursor-pointer"
           >
             Volver al Inventario Principal
           </button>
@@ -140,7 +164,7 @@ export default function InventarioPage() {
             <h2 className="text-2xl font-bold text-white">Gestión de Categorías</h2>
             <button
               onClick={() => { setSelectedCategoryToEdit(null); setIsCategoryModalOpen(true); }}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline cursor-pointer"
             >
               Añadir Categoría
             </button>
@@ -148,7 +172,7 @@ export default function InventarioPage() {
           <CategoryList categories={categories} areas={areas} onEdit={(category) => { setSelectedCategoryToEdit(category); setIsCategoryModalOpen(true); }} onCategoryDeleted={handleCategoryUpdated} />
           <button
             onClick={() => setShowCategoryManagement(false)}
-            className="mt-4 px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            className="mt-4 px-4 py-2 text-sm font-medium text-gray-300 hover:text-white bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 cursor-pointer"
           >
             Volver al Inventario Principal
           </button>
@@ -167,7 +191,7 @@ export default function InventarioPage() {
                 setSelectedArea(e.target.value || undefined);
                 setSelectedCategory(undefined); // Reset category when area changes
               }}
-              className="p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
             >
               <option value="">Todas las Áreas</option>
               {areas.map(area => (
@@ -180,7 +204,7 @@ export default function InventarioPage() {
               id="category-filter"
               value={selectedCategory || ''}
               onChange={(e) => setSelectedCategory(e.target.value || undefined)}
-              className="p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="p-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               disabled={!selectedArea && categories.length === 0} // Disable if no area selected or no categories
             >
               <option value="">Todas las Categorías</option>
@@ -196,6 +220,7 @@ export default function InventarioPage() {
             categories={categories}
             onEditItem={(item: Item) => { setSelectedItem(item); setIsItemModalOpen(true); }}
             onItemDeleted={handleItemUpdated}
+            onDeleteItem={handleDeleteItemClick}
           />
         </>
       )}
@@ -223,6 +248,16 @@ export default function InventarioPage() {
         onSuccess={() => { setIsCategoryModalOpen(false); setSelectedCategoryToEdit(null); handleCategoryUpdated(); }}
         category={selectedCategoryToEdit}
         areas={areas}
+      />
+
+      {/* Confirmation Modal for Item Deletion */}
+      <ConfirmationModal
+        isOpen={isConfirmItemModalOpen}
+        onClose={() => setIsConfirmItemModalOpen(false)}
+        onConfirm={handleConfirmDeleteItem}
+        title="Confirmar Eliminación"
+        message={`¿Estás seguro de que quieres eliminar el elemento "${itemToDelete?.name || ''}"? Esta acción no se puede deshacer.`}
+        isLoading={false} // Puedes añadir un estado de carga si la eliminación es asíncrona y quieres un indicador
       />
     </div>
   );

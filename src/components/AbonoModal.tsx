@@ -44,7 +44,7 @@ export default function AbonoModal({ isOpen, onClose, onSuccess, deuda }: AbonoM
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black/75 bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-gray-800 rounded-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-semibold text-white mb-4">Registrar Abono</h2>
         <div className="mb-4">
